@@ -3,11 +3,9 @@ name: '更新数据'
 on:
   schedule:
     - cron: '0 */12 * * *'
-  push:
   workflow_dispatch:
     branches:
       - main
-      - dev
 jobs:
   push:
     runs-on: ${{ matrix.operating-system }}
