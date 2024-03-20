@@ -11,7 +11,6 @@ jobs:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
-        # in this example, there is a newer version already installed, 3.7.7, so the older version will be downloaded
         operating-system: ['ubuntu-20.04']
     steps:
       - uses: actions/checkout@v3 # Checking out the repo
@@ -44,14 +43,16 @@ jobs:
 
       - name: Install pipenv
         run: pip3 install --user pipenv
-      - name: Install dependecies
+      - name: Install dependencies
         run: pipenv --python python3 && pipenv install
       - name: Build
         run: pipenv run build
       - name: Commit and push if changed
+        env:
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
         run: |
-          git config --local user.email "github-actions[bot]@users.noreply.github.com"
-          git config --local user.name "github-actions[bot]"
+          git config --local user.email "yuan.lr.yaa@gmail.com"
+          git config --local user.name "LR"
           git diff
           if [[ -f ${{ steps.set_final_file_name.outputs.final_file }} ]]; then
             git add ${{ steps.set_final_file_name.outputs.final_file }}
@@ -61,5 +62,5 @@ jobs:
           fi
           if [[ `git status --porcelain` ]]; then
             git commit -m "Github Action Auto Updated"
-            git push
+            git push https://github.com/${{ github.repository }}.git HEAD:main
           fi
