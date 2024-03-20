@@ -12,7 +12,6 @@
 - 分页结果获取（可配置页数、接口数量）
 - 保证更新时效性，配置获取最近时间范围内更新的接口
 - 可过滤 ipv4、ipv6 接口
-- LR 改编部分内容
 ## 使用方法
 
 1. Fork 此项目，开启 Action 工作流可读写权限：
@@ -46,6 +45,10 @@
    - https://mirror.ghproxy.com/raw.githubusercontent.com/用户名/仓库名称/master/live.m3u
 
 ## 更新日志
+
+### 2024/3/20
+- 输出txt格式改成 m3u格式
+- LR
 
 ### 2024/3/18
 
