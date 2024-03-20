@@ -14,12 +14,8 @@
 - 可过滤 ipv4、ipv6 接口
 ## 使用方法
 
-1. Fork 此项目，开启 Action 工作流可读写权限：
-
-   - Settings → Actions → General → Workflow permissions → Read and write permissions → Save
-
-2. 修改 demo.txt 模板文件，修改成您想要的频道分类与频道顺序，后续更新根据此文件内容进行更新。
-3. 修改配置（可选）：
+1. 修改 demo.txt 模板文件，修改成您想要的频道分类与频道顺序，后续更新根据此文件内容进行更新。
+2. 修改配置（可选）：
 
    #### config.py：
 
