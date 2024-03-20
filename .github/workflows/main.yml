@@ -4,10 +4,8 @@ on:
   schedule:
     - cron: '0 */12 * * *'
   push:
-    branches:
-      - main
   workflow_dispatch:
-    branches:
+    分支:
       - main
       - dev
 jobs:
