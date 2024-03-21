@@ -48,7 +48,7 @@ def updateChannelUrlsM3U(cate, channelUrls):
         for name, urls in channelUrls.items():
             for url in urls:
                 if url is not None:
-                    f.write(f"#EXTINF:-1 tvg-id=\"\" tvg-name=\"{name}\" tvg-logo=\"https://gh.con.sh/https://raw.githubusercontent.com/yuanzl77/TVBox-logo/main/png/{name}.png\" group-title=\"{cate}\",{name}\n")
+                    f.write(f"#EXTINF:-1 tvg-id=\"\" tvg-name=\"{name}\" tvg-logo=\"https://gitee.com/yuanzl77/TVBox-logo/raw/main/png/{name}.png\" group-title=\"{cate}\",{name}\n")
                     f.write(url + "\n")
         f.write("\n")
 
