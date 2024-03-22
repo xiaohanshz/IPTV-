@@ -74,13 +74,13 @@ class UpdateSource:
                 sorted_data = await compareSpeedAndResolution(infoList)
                 ipvSortedData = filterSortedDataByIPVType(sorted_data)
                 if ipvSortedData:
-                    channelUrls[name] = getTotalUrls(ipvSortedData) or channelObj[name]
+                    channelUrls[name] = getTotalUrls(ipvSortedData) or channelUrls[name]
                     for (url, date, resolution), response_time in ipvSortedData:
                         logging.info(
                             f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
                         )
                 else:
-                    channelUrls[name] = filterByIPVType(channelObj[name])
+                    channelUrls[name] = filterByIPVType(channelUrls[name])
         except Exception as e:
             logging.error(f"Error on category {cate} and name {name}: {e}")
         updateChannelUrlsM3U(cate, channelUrls)
