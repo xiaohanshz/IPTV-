@@ -6,54 +6,30 @@ on:
   workflow_dispatch:
     branches:
       - main
-
 jobs:
   push:
     runs-on: ${{ matrix.operating-system }}
     strategy:
       matrix:
         operating-system: ['ubuntu-20.04']
-
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Python 3.9
-        uses: actions/setup-python@v2
+      - uses: actions/checkout@v3 # Checking out the repo
+      - name: Run with setup-python 3.9
+        uses: actions/setup-python@v4
         with:
           python-version: '3.9'
-
-      - name: Install pipenv
-        run: |
-          python -m pip install --upgrade pip
-          pip install --user pipenv
-
-      - name: Cache dependencies
-        uses: actions/cache@v2
-        with:
-          path: ~/.cache/pip
-          key: ${{ runner.os }}-pip-${{ hashFiles('**/Pipfile.lock') }}
-          restore-keys: |
-            ${{ runner.os }}-pip-
-
-      - name: Install dependencies
-        run: |
-          pipenv --python 3
-          pipenv install --deploy --ignore-pipfile
-          pipenv install beautifulsoup4  # Install BeautifulSoup4 module
+          update-environment: false
+          cache: 'pipenv'
 
       - name: Install Selenium
         run: |
           sudo pip3 install selenium
-
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@latest
         with:
           chrome-version: stable
-
       - name: Download chrome driver
         uses: nanasess/setup-chromedriver@master
-
       - name: Launch chrome driver
         run: |
           export DISPLAY=:99
@@ -62,25 +38,29 @@ jobs:
 
       - name: Set final file name
         id: set_final_file_name
-        run: echo "::set-output name=final_file::$(python -c 'import config; print(config.final_file)')"
+        run: |
+          echo "::set-output name=final_file::$(python -c 'import config; print(config.final_file)')"
 
+      - name: Install pipenv
+        run: pip3 install --user pipenv
+      - name: Install dependencies
+        run: pipenv --python python3 && pipenv install
       - name: Build
         run: pipenv run build
-      
       - name: Commit and push if changed
-         env:
-           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-         run: |
-           git config --local user.email "yuan.lr.yaa@gmail.com"
-           git config --local user.name "LR"
-           git diff
-           if [[ -f ${{ steps.set_final_file_name.outputs.final_file }} ]]; then
-             git add ${{ steps.set_final_file_name.outputs.final_file }}
-           fi
-           if [[ -f result.log ]]; then
-             git add result.log
-           fi
-           if [[ `git status --porcelain` ]]; then
-             git commit -m "Github Action Auto Updated"
-             git push https://github.com/${{ github.repository }}.git HEAD:main
-           fi
+        env:
+          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        run: |
+          git config --local user.email "yuan.lr.yaa@gmail.com"
+          git config --local user.name "LR"
+          git diff
+          if [[ -f ${{ steps.set_final_file_name.outputs.final_file }} ]]; then
+            git add ${{ steps.set_final_file_name.outputs.final_file }}
+          fi
+          if [[ -f result.log ]]; then
+            git add result.log
+          fi
+          if [[ `git status --porcelain` ]]; then
+            git commit -m "Github Action Auto Updated"
+            git push https://github.com/${{ github.repository }}.git HEAD:main
+          fi
