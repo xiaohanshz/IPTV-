@@ -40,6 +40,7 @@ jobs:
         run: |
           pipenv --python 3
           pipenv install --deploy --ignore-pipfile
+          pipenv install beautifulsoup4  # Install BeautifulSoup4 module
 
       - name: Install Selenium
         run: |
