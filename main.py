@@ -51,6 +51,7 @@ class UpdateSource:
         return UpdateSource.driver
 
     async def visit_page(self, name, is_favorite):
+        await asyncio.sleep(8)
         channel_urls = {}
         page_num = config.favorite_page_num if is_favorite else config.default_page_num
         for page in range(1, page_num):
