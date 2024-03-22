@@ -82,7 +82,7 @@ class UpdateSource:
                             f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
                         )
                 else:
-                    channel_urls[name] = filterByIPVType(channelObj[name])
+                    channel_urls[name] = filterByIPVType(channel_urls[name])  # 修改为 channel_urls
             except Exception as e:
                 logging.error(f"Error on page {page}: {e}")
                 continue
