@@ -57,8 +57,6 @@ class UpdateSource:
             try:
                 page_url = f"http://tonkiang.us/?page={page}&s={name}"
                 self.driver.get(page_url)
-                await self.driver_wait(name)
-
                 await self.driver_wait_for_element(By.CSS_SELECTOR, "div.tables")
 
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
