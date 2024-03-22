@@ -54,46 +54,49 @@ class UpdateSource:
         channel_urls = {}
         page_num = config.favorite_page_num if is_favorite else config.default_page_num
         for page in range(1, page_num):
-             try:
-              page_url = f"http://tonkiang.us/?page={page}&s={name}"
-              self.driver.get(page_url)
-              await self.driver_wait(name)
+            try:
+                page_url = f"http://tonkiang.us/?page={page}&s={name}"
+                self.driver.get(page_url)
+                await self.driver_wait(name)
 
-              await self.driver_wait_for_element(By.CSS_SELECTOR, "div.tables")
+                await self.driver_wait_for_element(By.CSS_SELECTOR, "div.tables")
 
-              soup = BeautifulSoup(self.driver.page_source, "html.parser")
-              tables_div = soup.find("div", class_="tables")
-              results = tables_div.find_all("div", class_="result") if tables_div else []
-              if not any(result.find("div", class_="m3u8") for result in results):
-                  break
-              info_list = []
-              for result in results:
-                  try:
-                      url, date, resolution = getUrlInfo(result)
-                      if url:
-                          info_list.append((url, date, resolution))
-                  except Exception as e:
-                      logging.error(f"Error on result {result}: {e}")
-                      continue
-              sorted_data = await compareSpeedAndResolution(info_list)
-              ipv_sorted_data = filterSortedDataByIPVType(sorted_data)
-              if ipv_sorted_data:
-                  channel_urls[name] = getTotalUrls(ipv_sorted_data)
-                  for (url, date, resolution), response_time in ipv_sorted_data:
-                      logging.info(
-                          f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
-                      )
-              else:
-                  channel_urls[name] = filterByIPVType(channelObj[name])
-                  except Exception as e:
-              logging.error(f"Error on page {page}: {e}")
-              continue
+                soup = BeautifulSoup(self.driver.page_source, "html.parser")
+                tables_div = soup.find("div", class_="tables")
+                results = tables_div.find_all("div", class_="result") if tables_div else []
+                if not any(result.find("div", class_="m3u8") for result in results):
+                    break
+                info_list = []
+                for result in results:
+                    try:
+                        url, date, resolution = getUrlInfo(result)
+                        if url:
+                            info_list.append((url, date, resolution))
+                    except Exception as e:
+                        logging.error(f"Error on result {result}: {e}")
+                        continue
+                sorted_data = await compareSpeedAndResolution(info_list)
+                ipv_sorted_data = filterSortedDataByIPVType(sorted_data)
+                if ipv_sorted_data:
+                    channel_urls[name] = getTotalUrls(ipv_sorted_data)
+                    for (url, date, resolution), response_time in ipv_sorted_data:
+                        logging.info(
+                            f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
+                        )
+                else:
+                    channel_urls[name] = filterByIPVType(channelObj[name])
+            except Exception as e:
+                logging.error(f"Error on page {page}: {e}")
+                continue
         return channel_urls
 
-      async def driver_wait_for_element(self, by, value, timeout=10):
-         await WebDriverWait(self.driver, timeout).until(
-            EC.presence_of_element_located((by, value))
-      )
+    async def driver_wait_for_element(self, by, value, timeout=10):
+        try:
+            await WebDriverWait(self.driver, timeout).until(
+                EC.presence_of_element_located((by, value))
+            )
+        except Exception as e:
+            logging.error(f"Error waiting for element: {e}")
 
     async def process_channels(self):
         tasks = []
