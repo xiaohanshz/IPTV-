@@ -90,7 +90,7 @@ class UpdateSource:
 
     async def driver_wait_for_element(self, by, value, timeout=10):
         try:
-            await WebDriverWait(self.driver, timeout).until(
+            await self.driver.wait.until(
                 EC.presence_of_element_located((by, value))
             )
         except Exception as e:
