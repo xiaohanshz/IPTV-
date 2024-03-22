@@ -108,6 +108,7 @@ class UpdateSource:
         self.driver = self.setup_driver()  # 创建Chrome Driver实例
         asyncio.run(self.process_channels())
         updateFile(config.final_file, "live_new.m3u")
+        updateChannelUrlsM3U(getChannelItems())  # 输出到 M3U 文件
         updateFile("result.log", "result_new.log")
 
 UpdateSource().main()
