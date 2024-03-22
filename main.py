@@ -85,7 +85,7 @@ class UpdateSource:
                       )
               else:
                   channel_urls[name] = filterByIPVType(channelObj[name])
-              except Exception as e:
+                  except Exception as e:
               logging.error(f"Error on page {page}: {e}")
               continue
         return channel_urls
