@@ -27,24 +27,28 @@ logging.basicConfig(
 
 class UpdateSource:
 
+    driver = None  # 类属性用于存储Chrome Driver实例
+
     def setup_driver(self):
-        options = webdriver.ChromeOptions()
-        options.add_argument("start-maximized")
-        options.add_argument("--headless")
-        options.add_experimental_option("excludeSwitches", ["enable-automation"])
-        options.add_experimental_option("useAutomationExtension", False)
-        options.add_argument("blink-settings=imagesEnabled=false")
-        driver = webdriver.Chrome(options=options)
-        stealth(
-            driver,
-            languages=["en-US", "en"],
-            vendor="Google Inc.",
-            platform="Win32",
-            webgl_vendor="Intel Inc.",
-            renderer="Intel Iris OpenGL Engine",
-            fix_hairline=True,
-        )
-        return driver
+        if not UpdateSource.driver:  # 如果实例不存在，则创建一个新的实例
+            options = webdriver.ChromeOptions()
+            options.add_argument("start-maximized")
+            options.add_argument("--headless")
+            options.add_experimental_option("excludeSwitches", ["enable-automation"])
+            options.add_experimental_option("useAutomationExtension", False)
+            options.add_argument("blink-settings=imagesEnabled=false")
+            driver = webdriver.Chrome(options=options)
+            stealth(
+                driver,
+                languages=["en-US", "en"],
+                vendor="Google Inc.",
+                platform="Win32",
+                webgl_vendor="Intel Inc.",
+                renderer="Intel Iris OpenGL Engine",
+                fix_hairline=True,
+            )
+            UpdateSource.driver = driver  # 将实例存储为类属性
+        return UpdateSource.driver
 
     async def visit_page(self, name, is_favorite):
         channel_urls = {}
@@ -97,7 +101,7 @@ class UpdateSource:
         return await asyncio.gather(*tasks)
 
     def main(self):
-        self.driver = self.setup_driver()
+        self.driver = self.setup_driver()  # 创建Chrome Driver实例
         asyncio.run(self.process_channels())
         updateFile(config.final_file, "live_new.m3u")
         updateFile("result.log", "result_new.log")
