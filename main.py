@@ -27,34 +27,32 @@ logging.basicConfig(
 
 class UpdateSource:
 
-    driver = None  # 类属性用于存储Chrome Driver实例
-
     def setup_driver(self):
-        if not UpdateSource.driver:  # 如果实例不存在，则创建一个新的实例
-            options = webdriver.ChromeOptions()
-            options.add_argument("start-maximized")
-            options.add_argument("--headless")
-            options.add_experimental_option("excludeSwitches", ["enable-automation"])
-            options.add_experimental_option("useAutomationExtension", False)
-            options.add_argument("blink-settings=imagesEnabled=false")
-            driver = webdriver.Chrome(options=options)
-            stealth(
-                driver,
-                languages=["en-US", "en"],
-                vendor="Google Inc.",
-                platform="Win32",
-                webgl_vendor="Intel Inc.",
-                renderer="Intel Iris OpenGL Engine",
-                fix_hairline=True,
-            )
-            UpdateSource.driver = driver  # 将实例存储为类属性
-        return UpdateSource.driver
+        options = webdriver.ChromeOptions()
+        options.add_argument("start-maximized")
+        options.add_argument("--headless")
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("useAutomationExtension", False)
+        options.add_argument("blink-settings=imagesEnabled=false")
+        driver = webdriver.Chrome(options=options)
+        stealth(
+            driver,
+            languages=["en-US", "en"],
+            vendor="Google Inc.",
+            platform="Win32",
+            webgl_vendor="Intel Inc.",
+            renderer="Intel Iris OpenGL Engine",
+            fix_hairline=True,
+        )
+        return driver
 
-    async def visit_page(self, name, is_favorite):
-        channel_urls = {}
-        page_num = config.favorite_page_num if is_favorite else config.default_page_num
-        for page in range(1, page_num):
-            try:
+    def __init__(self):
+        self.driver = self.setup_driver()
+
+    async def visit_page(self, cate, name, is_favorite):
+        channelUrls = {}
+        try:
+            for page in range(1, config.favorite_page_num if is_favorite else config.default_page_num):
                 page_url = f"http://tonkiang.us/?page={page}&s={name}"
                 self.driver.get(page_url)
                 await self.driver_wait_for_element(By.CSS_SELECTOR, "div.tables")
@@ -64,29 +62,29 @@ class UpdateSource:
                 results = tables_div.find_all("div", class_="result") if tables_div else []
                 if not any(result.find("div", class_="m3u8") for result in results):
                     break
-                info_list = []
+                infoList = []
                 for result in results:
                     try:
                         url, date, resolution = getUrlInfo(result)
                         if url:
-                            info_list.append((url, date, resolution))
+                            infoList.append((url, date, resolution))
                     except Exception as e:
                         logging.error(f"Error on result {result}: {e}")
                         continue
-                sorted_data = await compareSpeedAndResolution(info_list)
-                ipv_sorted_data = filterSortedDataByIPVType(sorted_data)
-                if ipv_sorted_data:
-                    channel_urls[name] = getTotalUrls(ipv_sorted_data)
-                    for (url, date, resolution), response_time in ipv_sorted_data:
+                sorted_data = await compareSpeedAndResolution(infoList)
+                ipvSortedData = filterSortedDataByIPVType(sorted_data)
+                if ipvSortedData:
+                    channelUrls[name] = getTotalUrls(ipvSortedData) or channelObj[name]
+                    for (url, date, resolution), response_time in ipvSortedData:
                         logging.info(
                             f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
                         )
                 else:
-                    channel_urls[name] = filterByIPVType(channel_urls[name])  # 修改为 channel_urls
-            except Exception as e:
-                logging.error(f"Error on page {page}: {e}")
-                continue
-        return channel_urls
+                    channelUrls[name] = filterByIPVType(channelObj[name])
+        except Exception as e:
+            logging.error(f"Error on category {cate} and name {name}: {e}")
+        updateChannelUrlsM3U(cate, channelUrls)
+        return cate, channelUrls
 
     async def driver_wait_for_element(self, by, value, timeout=10):
         try:
@@ -98,10 +96,10 @@ class UpdateSource:
 
     async def process_channels(self):
         tasks = []
-        for cate, channel_obj in getChannelItems().items():
-            for name in channel_obj.keys():
+        for cate, channelObj in getChannelItems().items():
+            for name in channelObj.keys():
                 is_favorite = name in config.favorite_list
-                tasks.append(self.visit_page(name, is_favorite))
+                tasks.append(self.visit_page(cate, name, is_favorite))
         return await asyncio.gather(*tasks)
 
     def main(self):
@@ -109,7 +107,6 @@ class UpdateSource:
         asyncio.run(self.process_channels())
         updateFile(config.final_file, "live_new.m3u")
         updateFile("result.log", "result_new.log")
-        channel_items = getChannelItems()  # 获取频道信息
-        updateChannelUrlsM3U(channel_items)  # 输出到 M3U 文件
+
 
 UpdateSource().main()
