@@ -51,12 +51,11 @@ class UpdateSource:
         return UpdateSource.driver
 
     async def visit_page(self, name, is_favorite):
-        await asyncio.sleep(8)
         channel_urls = {}
         page_num = config.favorite_page_num if is_favorite else config.default_page_num
         for page in range(1, page_num):
             try:
-                page_url = f"http://tonkiang.us/?page={page}&s={name}"
+                page_url = f"https://www.foodieguide.com/iptvsearch/?page={page}&s={name}"
                 self.driver.get(page_url)
                 await self.driver_wait(name)
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
