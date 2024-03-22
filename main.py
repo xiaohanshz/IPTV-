@@ -1,10 +1,10 @@
 import config
+import asyncio
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium_stealth import stealth
-import asyncio
 from bs4 import BeautifulSoup
 from utils import (
     getChannelItems,
@@ -24,7 +24,6 @@ logging.basicConfig(
     format="%(message)s",
     level=logging.INFO,
 )
-
 
 class UpdateSource:
 
@@ -47,72 +46,60 @@ class UpdateSource:
         )
         return driver
 
-    def __init__(self):
-        self.driver = self.setup_driver()
-
-    async def visitPage(self, channelItems):
-        for cate, channelObj in channelItems.items():
-            channelUrls = {}
-            for name in channelObj.keys():
-                isFavorite = name in config.favorite_list
-                pageNum = (
-                    config.favorite_page_num if isFavorite else config.default_page_num
-                )
-                infoList = []
-                for page in range(1, pageNum):
+    async def visit_page(self, name, is_favorite):
+        channel_urls = {}
+        page_num = config.favorite_page_num if is_favorite else config.default_page_num
+        for page in range(1, page_num):
+            try:
+                page_url = f"https://www.foodieguide.com/iptvsearch/?page={page}&s={name}"
+                self.driver.get(page_url)
+                await self.driver_wait(name)
+                soup = BeautifulSoup(self.driver.page_source, "html.parser")
+                tables_div = soup.find("div", class_="tables")
+                results = tables_div.find_all("div", class_="result") if tables_div else []
+                if not any(result.find("div", class_="m3u8") for result in results):
+                    break
+                info_list = []
+                for result in results:
                     try:
-                        page_url = f"https://www.foodieguide.com/iptvsearch/?page={page}&s={name}"
-                        self.driver.get(page_url)
-                        WebDriverWait(self.driver, 10).until(
-                            EC.presence_of_element_located(
-                                (By.CSS_SELECTOR, "div.tables")
-                            )
-                        )
-                        soup = BeautifulSoup(self.driver.page_source, "html.parser")
-                        tables_div = soup.find("div", class_="tables")
-                        results = (
-                            tables_div.find_all("div", class_="result")
-                            if tables_div
-                            else []
-                        )
-                        if not any(
-                            result.find("div", class_="m3u8") for result in results
-                        ):
-                            break
-                        for result in results:
-                            try:
-                                url, date, resolution = getUrlInfo(result)
-                                if url:
-                                    infoList.append((url, date, resolution))
-                            except Exception as e:
-                                print(f"Error on result {result}: {e}")
-                                continue
+                        url, date, resolution = getUrlInfo(result)
+                        if url:
+                            info_list.append((url, date, resolution))
                     except Exception as e:
-                        print(f"Error on page {page}: {e}")
+                        logging.error(f"Error on result {result}: {e}")
                         continue
-                try:
-                    sorted_data = await compareSpeedAndResolution(infoList)
-                    ipvSortedData = filterSortedDataByIPVType(sorted_data)
-                    if ipvSortedData:
-                        channelUrls[name] = (
-                            getTotalUrls(ipvSortedData) or channelObj[name]
+                sorted_data = await compareSpeedAndResolution(info_list)
+                ipv_sorted_data = filterSortedDataByIPVType(sorted_data)
+                if ipv_sorted_data:
+                    channel_urls[name] = getTotalUrls(ipv_sorted_data)
+                    for (url, date, resolution), response_time in ipv_sorted_data:
+                        logging.info(
+                            f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
                         )
-                        for (url, date, resolution), response_time in ipvSortedData:
-                            logging.info(
-                                f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
-                            )
-                    else:
-                        channelUrls[name] = filterByIPVType(channelObj[name])
-                except Exception as e:
-                    print(f"Error on sorting: {e}")
-                    continue
-            updateChannelUrlsM3U(cate, channelUrls)
-            await asyncio.sleep(1)
+                else:
+                    channel_urls[name] = filterByIPVType(channelObj[name])
+            except Exception as e:
+                logging.error(f"Error on page {page}: {e}")
+                continue
+        return channel_urls
+
+    async def driver_wait(self, name):
+        await WebDriverWait(self.driver, 10).until(
+            EC.presence_of_element_located((By.CSS_SELECTOR, "div.tables"))
+        )
+
+    async def process_channels(self):
+        tasks = []
+        for cate, channel_obj in getChannelItems().items():
+            for name in channel_obj.keys():
+                is_favorite = name in config.favorite_list
+                tasks.append(self.visit_page(name, is_favorite))
+        return await asyncio.gather(*tasks)
 
     def main(self):
-        asyncio.run(self.visitPage(getChannelItems()))
+        self.driver = self.setup_driver()
+        asyncio.run(self.process_channels())
         updateFile(config.final_file, "live_new.m3u")
         updateFile("result.log", "result_new.log")
-
 
 UpdateSource().main()
