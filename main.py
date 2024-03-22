@@ -85,10 +85,10 @@ class UpdateSource:
                       )
               else:
                   channel_urls[name] = filterByIPVType(channelObj[name])
-          except Exception as e:
+              except Exception as e:
               logging.error(f"Error on page {page}: {e}")
               continue
-          return channel_urls
+        return channel_urls
 
       async def driver_wait_for_element(self, by, value, timeout=10):
          await WebDriverWait(self.driver, timeout).until(
