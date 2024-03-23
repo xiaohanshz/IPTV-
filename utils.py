@@ -187,6 +187,16 @@ async def compareSpeedAndResolution(infoList):
     sorted_res = sorted(valid_responses, key=combined_key, reverse=True)
     return sorted_res
 
+def getTotalUrls(data):
+    """
+    Get the total urls with filter by date and depulicate
+    """
+    total_urls = []
+    if len(data) > config.urls_limit:
+        total_urls = [url for (url, _, _), _ in filterByDate(data)]
+    else:
+        total_urls = [url for (url, _, _), _ in data]
+    return list(dict.fromkeys(total_urls))
 
 async def process_channels():
     """
