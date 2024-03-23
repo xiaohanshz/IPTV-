@@ -7,9 +7,51 @@ import datetime
 import os
 import urllib.parse
 import ipaddress
+import subprocess
 
 
-def getChannelItems():
+async def play_url(url):
+    """
+    Test playback of a live stream URL for the specified duration.
+    """
+    command = [
+        "ffplay",
+        "-nodisp",  # Disable video display
+        "-loglevel",
+        "panic",  # Suppress FFmpeg console output
+        "-timeout",
+        str(config.url_time),  # Timeout specified by config
+        url,
+    ]
+    process = await asyncio.create_subprocess_exec(*command)
+    try:
+        await asyncio.wait_for(process.wait(), timeout=config.url_time)
+        # If the process finishes within the specified time, the URL is smooth
+        return True
+    except asyncio.TimeoutError:
+        # If the process doesn't finish within the specified time, the URL is not smooth
+        return False
+    except Exception as e:
+        print(f"Error while playing URL {url}: {e}")
+        return False
+
+
+async def filterByPlayback(url_list):
+    """
+    Filter URLs based on playback smoothness.
+    """
+    valid_urls = []
+    for url in url_list:
+        if await play_url(url):
+            valid_urls.append(url)
+            # If the URL plays smoothly, write it to the M3U file
+            updateChannelUrlsM3U("cate", {name: [url]})  # Assuming "cate" is the category
+        if len(valid_urls) >= config.urls_limit:
+            break
+    return valid_urls
+
+
+async def getChannelItems():
     """
     Get the channel items from the source file
     """
@@ -129,7 +171,8 @@ async def compareSpeedAndResolution(infoList):
     if not (
         0 <= response_time_weight <= 1
         and 0 <= resolution_weight <= 1
-        and response_time_weight + resolution_weight == 1
+        and response
+        time_weight + resolution_weight == 1
     ):
         response_time_weight = default_response_time_weight
         resolution_weight = default_resolution_weight
@@ -146,81 +189,31 @@ async def compareSpeedAndResolution(infoList):
     return sorted_res
 
 
-def filterByDate(data):
+async def process_channels():
     """
-    Filter by date and limit
+    Process channels to filter URLs based on playback smoothness.
     """
-    default_recent_days = 60
-    use_recent_days = getattr(config, "recent_days", 60)
-    if (
-        not isinstance(use_recent_days, int)
-        or use_recent_days <= 0
-        or use_recent_days > 365
-    ):
-        use_recent_days = default_recent_days
-    start_date = datetime.datetime.now() - datetime.timedelta(days=use_recent_days)
-    recent_data = []
-    for (url, date, resolution), response_time in data:
-        if date:
-            date = datetime.datetime.strptime(date, "%m-%d-%Y")
-            if date >= start_date:
-                recent_data.append(((url, date, resolution), response_time))
-    return recent_data
+    tasks = []
+    channel_items = await getChannelItems()
+    for cate, channelObj in channel_items.items():
+        for name, urls in channelObj.items():
+            tasks.append(filterByPlayback(urls))
+    filtered_urls = await asyncio.gather(*tasks)
+    channel_urls = {}
+    for (cate, channelObj), urls in zip(channel_items.items(), filtered_urls):
+        channel_urls[cate] = {name: urls for name, _ in channelObj.items()}
+    return channel_urls
 
 
-def getTotalUrls(data):
+def main():
     """
-    Get the total urls with filter by date and limit
+    Main function to process channels and update files.
     """
-    total_urls = []
-    if len(data) > config.urls_limit:
-        total_urls = [url for (url, _, _), _ in filterByDate(data)[: config.urls_limit]]
-    else:
-        total_urls = [url for (url, _, _), _ in data]
-    return list(dict.fromkeys(total_urls))
+    loop = asyncio.get_event_loop()
+    channel_urls = loop.run_until_complete(process_channels())
+    updateChannelUrlsM3U("cate", channel_urls)
+    updateFile(config.final_file, "live_new.m3u")
 
 
-def is_ipv6(url):
-    """
-    Check if the url is ipv6
-    """
-    try:
-        host = urllib.parse.urlparse(url).hostname
-        ipaddress.IPv6Address(host)
-        return True
-    except ValueError:
-        return False
-
-
-def filterSortedDataByIPVType(sorted_data):
-    """
-    Filter sorted data by ipv type
-    """
-    ipv_type = getattr(config, "ipv_type", "ipv4")
-    if ipv_type == "ipv4":
-        return [
-            ((url, date, resolution), response_time)
-            for (url, date, resolution), response_time in sorted_data
-            if not is_ipv6(url)
-        ]
-    elif ipv_type == "ipv6":
-        return [
-            ((url, date, resolution), response_time)
-            for (url, date, resolution), response_time in sorted_data
-            if is_ipv6(url)
-        ]
-    else:
-        return sorted_data
-
-
-def filterByIPVType(urls):
-    """
-    Filter by ipv type
-    """
-    ipv_type = getattr(config, "ipv_type", "ipv4")
-    if ipv_type == "ipv4":
-        return [url for url in urls if not is_ipv6(url)]
-    elif ipv_type == "ipv6":
-        return [url for url in urls if is_ipv6(url)]
-    else:
-        return urls
+if __name__ == "__main__":
+    main()
