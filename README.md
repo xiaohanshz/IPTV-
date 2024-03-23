@@ -26,7 +26,7 @@
    | favorite_list        | ["CCTV1","CCTV13"] | 关注频道名称列表（仅用于与常规频道区分，自定义获取分页数量）       |
    | favorite_page_num    | 6                  | 关注频道获取分页数量                                               |
    | default_page_num     | 4                  | 常规频道获取分页数量                                               |
-   | urls_limit           | 8                 | 单个频道接口数量                                                   |
+   | urls_limit           | 8                 | 单个频道接口数量                       | url_time           | 8                 | 测试url播放时长                                                  |
    | response_time_weight | 0.5                | 响应时间权重值（所有权重值总和应为 1）                             |
    | resolution_weight    | 0.5                | 分辨率权重值 （所有权重值总和应为 1）                              |
    | recent_days          | 30                 | 获取最近时间范围内更新的接口（单位天），适当减小可避免出现匹配问题 |
