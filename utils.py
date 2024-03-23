@@ -171,8 +171,7 @@ async def compareSpeedAndResolution(infoList):
     if not (
         0 <= response_time_weight <= 1
         and 0 <= resolution_weight <= 1
-        and response
-        time_weight + resolution_weight == 1
+        and response_time_weight + resolution_weight == 1
     ):
         response_time_weight = default_response_time_weight
         resolution_weight = default_resolution_weight
