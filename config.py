@@ -1,5 +1,5 @@
 source_file = "demo.txt"
-final_file = "live.m3u"
+final_file = "live2.m3u"
 favorite_list = [
     "CCTV1",
     "CCTV2",
