@@ -55,7 +55,7 @@ class UpdateSource:
             for page in range(1, config.favorite_page_num if is_favorite else config.default_page_num):
                 page_url = f"http://tonkiang.us/?page={page}&s={name}"
                 self.driver.get(page_url)
-                await self.driver_wait_for_element(By.CSS_SELECTOR, "div.tables")
+                self.driver_wait_for_element(By.CSS_SELECTOR, "div.tables")
 
                 soup = BeautifulSoup(self.driver.page_source, "html.parser")
                 tables_div = soup.find("div", class_="tables")
@@ -86,9 +86,9 @@ class UpdateSource:
         updateChannelUrlsM3U(cate, channelUrls)
         return cate, channelUrls
 
-    async def driver_wait_for_element(self, by, value, timeout=10):
+    def driver_wait_for_element(self, by, value, timeout=10):
         try:
-            await WebDriverWait(self.driver, timeout).until(
+            WebDriverWait(self.driver, timeout).until(
                 EC.presence_of_element_located((by, value))
             )
         except Exception as e:
