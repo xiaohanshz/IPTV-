@@ -8,6 +8,44 @@ import os
 import urllib.parse
 import ipaddress
 
+async def play_url(url):
+    """
+    Test playback of a live stream URL for the specified duration.
+    """
+    command = [
+        "ffplay",
+        "-nodisp",  # Disable video display
+        "-loglevel",
+        "panic",  # Suppress FFmpeg console output
+        "-timeout",
+        str(config.url_time),  # Timeout specified by config
+        url,
+    ]
+    process = await asyncio.create_subprocess_exec(*command)
+    try:
+        await asyncio.wait_for(process.wait(), timeout=config.url_time)
+        # If the process finishes within the specified time, the URL is smooth
+        return True
+    except asyncio.TimeoutError:
+        # If the process doesn't finish within the specified time, the URL is not smooth
+        return False
+    except Exception as e:
+        print(f"Error while playing URL {url}: {e}")
+        return False
+
+
+async def filterByPlayback(url_list):
+    """
+    Filter URLs based on playback smoothness.
+    """
+    valid_urls = []
+    for url in url_list:
+        if await play_url(url):
+            valid_urls.append(url)
+        if len(valid_urls) >= config.urls_limit:
+            break
+    return valid_urls
+
 
 def getChannelItems():
     """
