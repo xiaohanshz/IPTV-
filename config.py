@@ -1,5 +1,5 @@
 source_file = "demo.txt"
-final_file = "live2.m3u"
+final_file = "live.m3u"
 favorite_list = [
     "CCTV1",
     "CCTV2",
@@ -30,7 +30,7 @@ favorite_list = [
 favorite_page_num = 6
 default_page_num = 4
 urls_limit = 8
-url_time = 5
+url_time = 8
 response_time_weight = 0.5
 resolution_weight = 0.5
 recent_days = 45
