@@ -27,6 +27,10 @@ favorite_list = [
     "湖南卫视",
     "翡翠台",
 ]
+filter_url = [
+    "*live.goodiptv.club/*",
+    "*epg.pw/stream/*"
+]
 favorite_page_num = 8
 default_page_num = 5
 urls_limit = 8
