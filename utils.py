@@ -36,17 +36,18 @@ async def play_and_filter_url(url):
         print(f"Error while playing URL {url}: {e}")
         return False
 
+
 async def filterByPlayback(url_list):
     """
     Filter URLs based on playback smoothness and urls_limit.
     """
     valid_urls = []
-    filtered_urls = [url for url in url_list if not any(re.match(pattern, url) for pattern in config.filter_url)]
-    for url in filtered_urls:
-        if await play_and_filter_url(url):
-            valid_urls.append(url)
-        if len(valid_urls) >= config.urls_limit:
-            break
+    for url in url_list:
+        if not any(re.match(pattern, url) for pattern in config.filter_url):
+            if await play_and_filter_url(url):
+                valid_urls.append(url)
+            if len(valid_urls) >= config.urls_limit:
+                break
     return valid_urls
 
 
