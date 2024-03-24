@@ -20,22 +20,20 @@ favorite_list = [
     "CCTV16",
     "CCTV17",
     "海丰",
-    "蜡笔小新",
     "广东卫视",
     "海南卫视",
     "浙江卫视",
-    "湖南卫视",
-    "翡翠台",
+    "湖南卫视"
 ]
 filter_url = [
     "*live.goodiptv.club/*",
     "*epg.pw/stream/*"
 ]
 favorite_page_num = 8
-default_page_num = 5
-urls_limit = 8
+default_page_num = 6
+urls_limit = 10
 url_time = 8
 response_time_weight = 0.5
 resolution_weight = 0.5
-recent_days = 45
+recent_days = 60
 ipv_type = "ipv4"
