@@ -8,7 +8,8 @@ import asyncio
 from bs4 import BeautifulSoup
 from utils import (
     getChannelItems,
-    play_url,
+    play_and_filter_url,
+    filterByPlayback,
     updateChannelUrlsM3U,
     updateFile,
     getUrlInfo,
