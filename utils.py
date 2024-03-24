@@ -8,6 +8,52 @@ import os
 import urllib.parse
 import ipaddress
 
+
+async def play_url(url):
+    """
+    Test playback of a live stream URL for the specified duration.
+    """
+    # 添加过滤关键网址的逻辑
+    if any(re.match(pattern, url) for pattern in config.filter_url):
+        print(f"Skipping URL {url} due to filtering.")
+        return False
+    
+    command = [
+        "ffplay",
+        "-nodisp",  # Disable video display
+        "-loglevel",
+        "panic",  # Suppress FFmpeg console output
+        "-timeout",
+        str(config.url_time),  # Timeout specified by config
+        url,
+    ]
+    process = await asyncio.create_subprocess_exec(*command)
+    try:
+        await asyncio.wait_for(process.wait(), timeout=config.url_time)
+        # If the process finishes within the specified time, the URL is smooth
+        return True
+    except asyncio.TimeoutError:
+        # If the process doesn't finish within the specified time, the URL is not smooth
+        return False
+    except Exception as e:
+        print(f"Error while playing URL {url}: {e}")
+        return False
+
+
+async def filterByPlayback(url_list):
+    """
+    Filter URLs based on playback smoothness and urls_limit.
+    """
+    valid_urls = []
+    filtered_urls = [url for url in url_list if not any(re.match(pattern, url) for pattern in config.filter_url)]
+    for url in filtered_urls:
+        if await play_url(url):
+            valid_urls.append(url)
+        if len(valid_urls) >= config.urls_limit:
+            break
+    return valid_urls
+
+
 async def play_url(url):
     """
     Test playback of a live stream URL for the specified duration.
