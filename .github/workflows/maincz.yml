@@ -1,6 +1,7 @@
 name: Add Files
 
 on:
+  push:
     branches:
       - main
 
@@ -19,6 +20,6 @@ jobs:
 
       - name: Commit changes
         run: |
-          git config --global user.email "yuan.lr.yaa@gmail.com"
-          git config --global user.name "LR"
+          git config --global user.email "github@example.com"
+          git config --global user.name "GitHub Actions"
           git commit -m "Add Pipfile.lock and __pycache__/"
