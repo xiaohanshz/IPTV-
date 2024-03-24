@@ -1,0 +1,25 @@
+name: Add Files
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  add-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Add Pipfile.lock
+        run: git add Pipfile.lock
+
+      - name: Add __pycache__/
+        run: git add __pycache__/
+
+      - name: Commit changes
+        run: |
+          git config --global user.email "yuan.lr.yaa@gmail.com"
+          git config --global user.name "LR"
+          git commit -m "Add Pipfile.lock and __pycache__/"
