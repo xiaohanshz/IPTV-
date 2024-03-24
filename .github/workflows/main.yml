@@ -47,6 +47,8 @@ jobs:
         run: pipenv --python python3 && pipenv install
       - name: Build
         run: pipenv run build
+      - name: Add Pipfile.lock to staging area
+        run: git add Pipfile.lock
       - name: Commit and push if changed
         env:
           PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
