@@ -26,8 +26,8 @@ favorite_list = [
     "湖南卫视"
 ]
 filter_url = [
-    "(https?://)live\.goodiptv\.club/.*",
-    "(https?://)epg\.pw/stream/.*"
+    "live\.goodiptv\.club/.*",
+    "epg\.pw/stream/.*"
 ]
 favorite_page_num = 8
 default_page_num = 6
