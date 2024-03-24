@@ -1,0 +1,27 @@
+name: Add Git Changes
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  add_changes:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Set up Git
+        run: |
+          git config --global user.email "github@example.com"
+          git config --global user.name "GitHub Actions"
+
+      - name: Add Pipfile.lock
+        run: git add Pipfile.lock
+
+      - name: Add other files
+        run: git add __pycache__/  # Add other files if needed
+
+      - name: 提交更改
+        run: git commit -m "Add Pipfile.lock and __pycache__"
+
+      - name: Push changes
+        run: git push origin main
