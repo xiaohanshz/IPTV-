@@ -96,10 +96,8 @@ class UpdateSource:
                     sorted_data = await compareSpeedAndResolution(infoList)
                     ipvSortedData = filterSortedDataByIPVType(sorted_data)
                     if ipvSortedData:
-                        # Call filterByPlayback to filter URLs based on playback smoothness
-                        filtered_urls = await filterByPlayback(channelObj[name])
                         channelUrls[name] = (
-                            getTotalUrls(ipvSortedData) or filtered_urls
+                            getTotalUrls(ipvSortedData) or channelObj[name]
                         )
                         for (url, date, resolution), response_time in ipvSortedData:
                             logging.info(
