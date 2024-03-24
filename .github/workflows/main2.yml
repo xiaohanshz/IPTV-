@@ -1,7 +1,6 @@
 name: Add Files
 
 on:
-  push:
     branches:
       - main
 
