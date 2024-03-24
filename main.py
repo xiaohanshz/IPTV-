@@ -96,9 +96,13 @@ class UpdateSource:
                     sorted_data = await compareSpeedAndResolution(infoList)
                     ipvSortedData = filterSortedDataByIPVType(sorted_data)
                     if ipvSortedData:
-                        channelUrls[name] = (
-                            getTotalUrls(ipvSortedData) or channelObj[name]
-                        )
+                        # Call play_and_filter_url to test playback of URLs
+                        filtered_urls = []
+                        for (url, date, resolution), _ in ipvSortedData:
+                            if await play_and_filter_url(url):
+                                filtered_urls.append(url)
+                        # Filter URLs based on playback smoothness and urls_limit
+                        channelUrls[name] = await filterByPlayback(filtered_urls)
                         for (url, date, resolution), response_time in ipvSortedData:
                             logging.info(
                                 f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
