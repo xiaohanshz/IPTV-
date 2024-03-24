@@ -13,7 +13,6 @@ async def play_url(url):
     """
     Test playback of a live stream URL for the specified duration.
     """
-    # 添加过滤关键网址的逻辑
     if any(re.match(pattern, url) for pattern in config.filter_url):
         print(f"Skipping URL {url} due to filtering.")
         return False
