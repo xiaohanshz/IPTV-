@@ -7,12 +7,13 @@ import datetime
 import os
 import urllib.parse
 import ipaddress
+import fnmatch
 
 async def play_and_filter_url(url):
     """
     Test playback of a live stream URL for the specified duration and filter URLs based on playback smoothness.
     """
-    if any(re.match(pattern, url) for pattern in config.filter_url):
+    if any(fnmatch.fnmatch(url, pattern) for pattern in config.filter_url):
         print(f"Skipping URL {url} due to filtering.")
         return False
 
@@ -28,10 +29,8 @@ async def play_and_filter_url(url):
     process = await asyncio.create_subprocess_exec(*command)
     try:
         await asyncio.wait_for(process.wait(), timeout=config.url_time)
-        # If the process finishes within the specified time, the URL is smooth
         return True
     except asyncio.TimeoutError:
-        # If the process doesn't finish within the specified time, the URL is not smooth
         return False
     except Exception as e:
         print(f"Error while playing URL {url}: {e}")
