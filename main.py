@@ -8,7 +8,6 @@ import asyncio
 from bs4 import BeautifulSoup
 from utils import (
     getChannelItems,
-    play_and_filter_url,
     filterByPlayback,
     updateChannelUrlsM3U,
     updateFile,
@@ -26,7 +25,6 @@ logging.basicConfig(
     format="%(message)s",
     level=logging.INFO,
 )
-
 
 class UpdateSource:
 
@@ -96,9 +94,9 @@ class UpdateSource:
                     sorted_data = await compareSpeedAndResolution(infoList)
                     ipvSortedData = filterSortedDataByIPVType(sorted_data)
                     if ipvSortedData:
-                        channelUrls[name] = (
-                            getTotalUrls(ipvSortedData) or channelObj[name]
-                        )
+                        urls = [item[0] for item in ipvSortedData]
+                        valid_urls = await filterByPlayback(urls)
+                        channelUrls[name] = valid_urls or channelObj[name]
                         for (url, date, resolution), response_time in ipvSortedData:
                             logging.info(
                                 f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
@@ -115,6 +113,5 @@ class UpdateSource:
         asyncio.run(self.visitPage(getChannelItems()))
         updateFile(config.final_file, "live_new.m3u")
         updateFile("result.log", "result_new.log")
-
 
 UpdateSource().main()
