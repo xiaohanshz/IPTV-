@@ -234,5 +234,6 @@ def FilterURL(url):
     Filter URLs by keywords specified in config.filter_url
     """
     filter_keywords = getattr(config, "filter_url", [])
-    filtered_urls = [url for url in urls if not any(keyword in url for keyword in filter_keywords)]
+    filtered_urls = [url for url in url if not any(keyword in url for keyword in filter_keywords)]
+    filtered_urls = filtered_urls[:config.urls_limit]
     return filtered_urls
