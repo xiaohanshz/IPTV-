@@ -94,10 +94,9 @@ class UpdateSource:
                     sorted_data = await compareSpeedAndResolution(infoList)
                     ipvSortedData = filterSortedDataByIPVType(sorted_data)
                     if ipvSortedData:
-                        # Filter URLs based on filter_url list
                         filtered_urls = [
                             url for (url, _, _) in ipvSortedData
-                            if not any(pattern.match(url) for pattern in config.filter_url)
+                            if not any(keyword in url for keyword in config.filter_url)
                         ]
                         channelUrls[name] = getTotalUrls(filtered_urls) or channelObj[name]
                         for (url, date, resolution), response_time in ipvSortedData:
@@ -118,4 +117,4 @@ class UpdateSource:
         updateFile("result.log", "result_new.log")
 
 
-UpdateSource().main()
+UpdateSource()。main()
