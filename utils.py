@@ -229,7 +229,7 @@ def filterByIPVType(urls):
     else:
         return urls
 
-def FilterKeyURL(urls):
+def FilterURL(url):
     """
     Filter URLs by keywords specified in config.filter_url
     """
