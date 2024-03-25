@@ -5,6 +5,8 @@
 #EXTM3U
 #EXTINF:-1 tvg-id="" tvg-name="黄河卫视" tvg-logo="https://gitee.com/yuanzl77/TVBox-logo/raw/main/png/黄河卫视.png" group-title="卫视频道",黄河卫视
 
+#EXTINF:-1 tvg-id="" tvg-name="安多卫视" tvg-logo="https://gitee.com/yuanzl77/TVBox-logo/raw/main/png/安多卫视.png" group-title="卫视频道",安多卫视
+
 
 #EXTM3U
 #EXTINF:-1 tvg-id="" tvg-name="Now剧集" tvg-logo="https://gitee.com/yuanzl77/TVBox-logo/raw/main/png/Now剧集.png" group-title="港·澳·台",Now剧集
