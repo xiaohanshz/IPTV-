@@ -83,11 +83,6 @@ class UpdateSource:
                             try:
                                 url, date, resolution = getUrlInfo(result)
                                 if url:
-                                    # Check if the URL matches any of the filter patterns
-                                    if any(
-                                        re.match(pattern, url) for pattern in config.filter_url
-                                    ):
-                                        continue  # Skip this URL
                                     infoList.append((url, date, resolution))
                             except Exception as e:
                                 print(f"Error on result {result}: {e}")
@@ -99,9 +94,12 @@ class UpdateSource:
                     sorted_data = await compareSpeedAndResolution(infoList)
                     ipvSortedData = filterSortedDataByIPVType(sorted_data)
                     if ipvSortedData:
-                        channelUrls[name] = (
-                            getTotalUrls(ipvSortedData) or channelObj[name]
-                        )
+                        # Filter URLs based on filter_url list
+                        filtered_urls = [
+                            url for (url, _, _) in ipvSortedData
+                            if not any(pattern.match(url) for pattern in config.filter_url)
+                        ]
+                        channelUrls[name] = getTotalUrls(filtered_urls) or channelObj[name]
                         for (url, date, resolution), response_time in ipvSortedData:
                             logging.info(
                                 f"Name: {name}, URL: {url}, Date: {date}, Resolution: {resolution}, Response Time: {response_time}ms"
