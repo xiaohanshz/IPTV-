@@ -28,7 +28,7 @@ logging.basicConfig(
 
 
 class UpdateSource:
-
+    
     def setup_driver(self):
         options = webdriver.ChromeOptions()
         options.add_argument("start-maximized")
