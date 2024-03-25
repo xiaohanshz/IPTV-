@@ -8,7 +8,7 @@ import asyncio
 from bs4 import BeautifulSoup
 from utils import (
     getChannelItems,
-    updateChannelUrlsM3U，
+    updateChannelUrlsM3U,
     updateFile,
     getUrlInfo,
     compareSpeedAndResolution,
@@ -83,6 +83,11 @@ class UpdateSource:
                             try:
                                 url, date, resolution = getUrlInfo(result)
                                 if url:
+                                    # Check if the URL matches any of the filter patterns
+                                    if any(
+                                        re.match(pattern, url) for pattern in config.filter_url
+                                    ):
+                                        continue  # Skip this URL
                                     infoList.append((url, date, resolution))
                             except Exception as e:
                                 print(f"Error on result {result}: {e}")
