@@ -117,4 +117,4 @@ class UpdateSource:
         updateFile("result.log", "result_new.log")
 
 
-UpdateSource()。main()
+UpdateSource().main()
