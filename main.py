@@ -15,7 +15,7 @@ from utils import (
     getTotalUrls,
     filterSortedDataByIPVType,
     filterByIPVType,
-    FilterKeyURL,
+    FilterURL,
 )
 import logging
 
@@ -95,7 +95,7 @@ class UpdateSource:
                     sorted_data = await compareSpeedAndResolution(infoList)
                     ipvSortedData = filterSortedDataByIPVType(sorted_data)
                     if ipvSortedData:
-                        filtered_urls = FilterKeyURL([url for url, _, _ in ipvSortedData])
+                        filtered_urls = FilterURL([url for url, _, _ in ipvSortedData])
                         channelUrls[name] = getTotalUrls(filtered_urls) or channelObj[name]
                         for (url, date, resolution), response_time in ipvSortedData:
                             logging.info(
