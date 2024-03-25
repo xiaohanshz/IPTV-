@@ -7,48 +7,6 @@ import datetime
 import os
 import urllib.parse
 import ipaddress
-import fnmatch
-
-async def play_and_filter_url(url):
-    """
-    Test playback of a live stream URL for the specified duration and filter URLs based on playback smoothness.
-    """
-    if any(fnmatch.fnmatch(url, pattern) for pattern in config.filter_url):
-        print(f"Skipping URL {url} due to filtering.")
-        return False
-
-    command = [
-        "ffplay",
-        "-nodisp",  # Disable video display
-        "-loglevel",
-        "panic",  # Suppress FFmpeg console output
-        "-timeout",
-        str(config.url_time),  # Timeout specified by config
-        url,
-    ]
-    process = await asyncio.create_subprocess_exec(*command)
-    try:
-        await asyncio.wait_for(process.wait(), timeout=config.url_time)
-        return True
-    except asyncio.TimeoutError:
-        return False
-    except Exception as e:
-        print(f"Error while playing URL {url}: {e}")
-        return False
-
-
-async def filterByPlayback(url_list):
-    """
-    Filter URLs based on playback smoothness and urls_limit.
-    """
-    valid_urls = []
-    for url in url_list:
-        if not any(re.match(pattern, url) for pattern in config.filter_url):
-            if await play_and_filter_url(url):
-                valid_urls.append(url)
-            if len(valid_urls) >= config.urls_limit:
-                break
-    return valid_urls
 
 
 def getChannelItems():
@@ -81,17 +39,16 @@ def getChannelItems():
     return channels
 
 
-def updateChannelUrlsM3U(cate, channelUrls):
+def updateChannelUrlsTxt(cate, channelUrls):
     """
-    Update the category and channel urls to the final file in M3U format
+    Update the category and channel urls to the final file
     """
-    with open("live_new.m3u", "a") as f:
-        f.write("#EXTM3U\n")
+    with open("result_new.txt", "a") as f:
+        f.write(cate + ",#genre#\n")
         for name, urls in channelUrls.items():
             for url in urls:
                 if url is not None:
-                    f.write(f"#EXTINF:-1 tvg-id=\"\" tvg-name=\"{name}\" tvg-logo=\"https://gitee.com/yuanzl77/TVBox-logo/raw/main/png/{name}.png\" group-title=\"{cate}\",{name}\n")
-                    f.write(url + "\n")
+                    f.write(name + "," + url + "\n")
         f.write("\n")
 
 
