@@ -228,3 +228,11 @@ def filterByIPVType(urls):
         return [url for url in urls if is_ipv6(url)]
     else:
         return urls
+
+def FilterKeyURL(urls):
+    """
+    Filter URLs by keywords specified in config.filter_url
+    """
+    filter_keywords = getattr(config, "filter_url", [])
+    filtered_urls = [url for url in urls if not any(keyword in url for keyword in filter_keywords)]
+    return filtered_urls
