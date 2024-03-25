@@ -39,18 +39,18 @@ def getChannelItems():
     return channels
 
 
-def updateChannelUrlsTxt(cate, channelUrls):
+def updateChannelUrlsM3U(cate, channelUrls):
     """
-    Update the category and channel urls to the final file
+    Update the category and channel urls to the final file in M3U format
     """
-    with open("result_new.txt", "a") as f:
-        f.write(cate + ",#genre#\n")
+    with open("live_new.m3u", "a") as f:
+        f.write("#EXTM3U\n")
         for name, urls in channelUrls.items():
             for url in urls:
                 if url is not None:
-                    f.write(name + "," + url + "\n")
+                    f.write(f"#EXTINF:-1 tvg-id=\"\" tvg-name=\"{name}\" tvg-logo=\"https://gitee.com/yuanzl77/TVBox-logo/raw/main/png/{name}.png\" group-title=\"{cate}\",{name}\n")
+                    f.write(url + "\n")
         f.write("\n")
-
 
 def updateFile(final_file, old_file):
     """
