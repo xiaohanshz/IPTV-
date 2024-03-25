@@ -6,63 +6,47 @@ on:
   workflow_dispatch:
     branches:
       - main
+
 jobs:
-  push:
-    runs-on: ${{ matrix.operating-system }}
-    strategy:
-      matrix:
-        operating-system: ['ubuntu-20.04']
+  update_data:
+    runs-on: ubuntu-20.04
+    
     steps:
-      - uses: actions/checkout@v3 # Checking out the repo
-      - name: Run with setup-python 3.9
-        uses: actions/setup-python@v4
+      - name: Checkout repository
+        uses: actions/checkout@v3
+
+      - name: Set up Python 3.9
+        uses: actions/setup-python@v2
         with:
           python-version: '3.9'
-          update-environment: false
-          cache: 'pipenv'
 
-      - name: Install Selenium
+      - name: Install dependencies
         run: |
-          sudo pip3 install selenium
+          pip install selenium
+          pip install bs4
+          pip install selenium-stealth
+
       - name: Set up Chrome
         uses: browser-actions/setup-chrome@latest
         with:
           chrome-version: stable
-      - name: Download chrome driver
+
+      - name: Download Chrome driver
         uses: nanasess/setup-chromedriver@master
-      - name: Launch chrome driver
+
+      - name: Launch Chrome driver
         run: |
           export DISPLAY=:99
           chromedriver --url-base=/wd/hub &
-          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 & # optional
+          sudo Xvfb -ac :99 -screen 0 1280x1024x24 > /dev/null 2>&1 &
 
-      - name: Set final file name
-        id: set_final_file_name
-        run: |
-          echo "::set-output name=final_file::$(python -c 'import config; print(config.final_file)')"
+      - name: Run Python script
+        run: python main.py
 
-      - name: Install pipenv
-        run: pip3 install --user pipenv
-      - name: Install dependencies
-        run: pipenv --python python3 && pipenv install
-      - name: Build
-        run: pipenv run build
-      - name: Add Pipfile.lock to staging area
-        run: git add Pipfile.lock
-      - name: Commit and push if changed
-        env:
-          PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+      - name: Commit and push changes
         run: |
-          git config --local user.email "yuan.lr.yaa@gmail.com"
-          git config --local user.name "LR"
-          git diff
-          if [[ -f ${{ steps.set_final_file_name.outputs.final_file }} ]]; then
-            git add ${{ steps.set_final_file_name.outputs.final_file }}
-          fi
-          if [[ -f result.log ]]; then
-            git add result.log
-          fi
-          if [[ `git status --porcelain` ]]; then
-            git commit -m "Github Action Auto Updated"
-            git push https://github.com/${{ github.repository }}.git HEAD:main
-          fi
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add .
+          git diff --staged --quiet || git commit -m "Auto update data"
+          git push
