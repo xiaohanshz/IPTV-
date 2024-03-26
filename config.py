@@ -1,4 +1,4 @@
-source_file = "demo.txt"
+source_file = "https://epg.pw/test_channels_banned_cn.m3u"
 final_file = "cs.m3u"
 favorite_list = [
     "CCTV1",
@@ -19,11 +19,8 @@ favorite_list = [
     "CCTV15",
     "CCTV16",
     "CCTV17",
-    "海丰",
-    "广东卫视",
-    "海南卫视",
-    "浙江卫视",
-    "湖南卫视"
+    "中天新闻"
+    
 ]
 filter_url = [
     "live.goodiptv.club/",
